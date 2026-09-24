@@ -13,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.slf4j.Logger;
 
 import java.io.OutputStream;
@@ -43,6 +44,27 @@ public class InventoryHandler {
     private static final int ARMOR_SIZE = 4;
     private static final int OFFHAND_SIZE = 1;
     private static final int ENDER_SIZE = 27;
+
+    /** Как часто сохранять игроков на диск, в тиках (20 тиков = 1 сек). */
+    private static final int SAVE_INTERVAL_TICKS = 20 * 60;
+    private int tickCounter = 0;
+
+    @SubscribeEvent
+    public void onServerTick(ServerTickEvent.Post event) {
+        MinecraftServer server = event.getServer();
+        if (server == null) return;
+        if (++tickCounter % SAVE_INTERVAL_TICKS != 0) return;
+        if (server.getPlayerList().getPlayers().isEmpty()) return;
+        try {
+            // Жёсткое выключение сервера (kill процесса/панели) не вызывает
+            // "Saving players" — без этого игроки откатываются к последнему
+            // сейву (прошлому запуску). Периодический сейв ограничивает потерю
+            // примерно одной минутой игры.
+            server.getPlayerList().saveAll();
+        } catch (Exception e) {
+            LOGGER.warn("Periodic player save failed: {}", e.getMessage());
+        }
+    }
 
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
