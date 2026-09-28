@@ -44,6 +44,9 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
+    // AlopetsiyaAuth: проверка «игрок уже авторизован» для отложенного отката
+    // инвентаря (apply только после входа). Jar кладём в libs/ рядом с билдом.
+    compileOnly files('libs/alopetsiyaauth-1.0.0.jar')
 }
 
 tasks.withType(ProcessResources).configureEach {

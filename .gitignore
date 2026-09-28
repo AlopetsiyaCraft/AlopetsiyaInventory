@@ -16,3 +16,6 @@ bin/
 # OS
 Thumbs.db
 .DS_Store
+
+# Local build dependency (AlopetsiyaAuth jar; собрать и положить в libs/)
+libs/
